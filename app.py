@@ -4,8 +4,8 @@ import requests
 from flask import Flask, request
 
 # --- إعدادات البوت الأساسية ---
-BOT_TOKEN = '8967248759:AAEeLGENpZWGhr_RZgwOWbJo_sSZm2DI9z8'      # توكن بوتك
-API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'  # مفتاح الـ API الخاص بك
+BOT_TOKEN = '8967248759:AAEeLGENpZWGhr_RZgwOWbJo_sSZm2DI9z8'
+API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'
 
 # --- تهيئة البوت ---
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -16,14 +16,13 @@ def get_live_scores():
     """
     وظيفة لجلب النتائج المباشرة.
     """
-    url = "https://api.football-data.org/v4/matches?status=LIVE" # مثال لرابط النتائج المباشرة
+    url = "https://api.football-data.org/v4/matches?status=LIVE"
     headers = {
         'X-Auth-Token': API_FOOTBALL_KEY
     }
     
     try:
         response = requests.get(url, headers=headers)
-        # تم تصحيح الخطأ النحوي هنا (إضافة النقطتين في النهاية)
         if response.status_code == 200:
              data = response.json()
              return data
@@ -44,7 +43,6 @@ def send_live_scores(message):
     bot.reply_to(message, "جاري جلب النتائج المباشرة... يرجى الانتظار.")
     scores = get_live_scores()
     if scores:
-        # هذا هو النص التجريبي. سنقوم بتعديله لاحقاً لعرض النتائج بشكل منسق
         bot.reply_to(message, "تم جلب البيانات بنجاح!")
     else:
         bot.reply_to(message, "عذراً، حدث خطأ أثناء جلب النتائج. يرجى المحاولة لاحقاً.")
@@ -63,11 +61,9 @@ def get_message():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    # --- تم وضع رابط Render الصحيح الخاص بك هنا ---
     bot.set_webhook(url='https://agabot-live-2026-1.onrender.com' + '/' + BOT_TOKEN)
     return 'Bot is running!', 200
 
 # --- التشغيل الرئيسي ---
 if __name__ == "__main__":
-    # لا تغير المنفذ (Port)، اتركه يعمل على المتغير 'PORT'
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
