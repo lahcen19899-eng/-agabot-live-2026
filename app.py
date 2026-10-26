@@ -34,36 +34,4 @@ def get_live_scores():
         return None
 
 # --- معالجة أوامر تيليجرام ---
-@bot.message_handler(commands=['start', 'help'])
-def send_welcome(message):
-    bot.reply_to(message, "مرحباً بك في بوت النتائج المباشرة لكرة القدم! أرسل /live لمعرفة النتائج الحالية.")
-
-@bot.message_handler(commands=['live'])
-def send_live_scores(message):
-    bot.reply_to(message, "جاري جلب النتائج المباشرة... يرجى الانتظار.")
-    scores = get_live_scores()
-    if scores:
-        bot.reply_to(message, "تم جلب البيانات بنجاح!")
-    else:
-        bot.reply_to(message, "عذراً، حدث خطأ أثناء جلب النتائج. يرجى المحاولة لاحقاً.")
-
-# --- إعدادات Webhook لـ Render ---
-@app.route('/' + BOT_TOKEN, methods=['POST'])
-def get_message():
-    if request.headers.get('content-type') == 'application/json':
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return '!', 200
-    else:
-        return 'Not Found', 404
-
-@app.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url='https://agabot-live-2026-1.onrender.com' + '/' + BOT_TOKEN)
-    return 'Bot is running!', 200
-
-# --- التشغيل الرئيسي ---
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+@
