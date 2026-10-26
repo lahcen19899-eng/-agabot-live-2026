@@ -4,8 +4,8 @@ import requests
 from flask import Flask, request
 
 # --- إعدادات البوت الأساسية ---
-BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'      # ضع توكن بوتك هنا
-API_FOOTBALL_KEY = 'YOUR_API_FOOTBALL_KEY'  # ضع مفتاح الـ API هنا
+BOT_TOKEN = '8967248759:AAEeLGENpZWGhr_RZgwOWbJo_sSZm2DI9z8'      # توكن بوتك الجديد
+API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'  # مفتاح الـ API
 
 # --- تهيئة البوت ---
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -16,19 +16,19 @@ def get_live_scores():
     """
     وظيفة لجلب النتائج المباشرة.
     """
-    url = "https://api.football-data.org/v4/matches" # أو الرابط الخاص بك
+    url = "https://api.football-data.org/v4/matches?status=LIVE"
     headers = {
         'X-Auth-Token': API_FOOTBALL_KEY
     }
     
     try:
         response = requests.get(url, headers=headers)
-        # تم تصحيح الخطأ البرمجي هنا والتأكد من صحة الكود بنجاح
         if response.status_code == 200:
              data = response.json()
              return data
         else:
              print(f"API Error: Status Code {response.status_code}")
+             print(f"Response Body: {response.text}")
              return None
     except Exception as e:
         print(f"Exception in get_live_scores: {e}")
@@ -62,8 +62,7 @@ def get_message():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    # استبدل رابط render بالرابط الخاص بك لاحقاً أو اتركه مؤقتاً
-    bot.set_webhook(url='YOUR_RENDER_URL' + '/' + BOT_TOKEN)
+    bot.set_webhook(url='https://agabot-live-2026.onrender.com' + '/' + BOT_TOKEN)
     return 'Bot is running!', 200
 
 # --- التشغيل الرئيسي ---
