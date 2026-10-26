@@ -62,7 +62,7 @@ def get_message():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://agabot-live-2026.onrender.com' + '/' + BOT_TOKEN)
+    bot.set_webhook(url='https://agabot-live-2026-1.onrender.com' + '/' + BOT_TOKEN)
     return 'Bot is running!', 200
 
 # --- التشغيل الرئيسي ---
