@@ -9,33 +9,6 @@ API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
 
-def get_live_scores():
-    url = "https://api.football-data.org/v4/matches?status=LIVE"
-    headers = {
-        'X-Auth-Token': API_FOOTBALL_KEY
-    }
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-             return response.json()
-        else:
-             return None
-    except Exception as e:
-        return None
-
-@bot.message_handler(commands=['start', 'help'])
-def send_welcome(message):
-    bot.reply_to(message, "مرحباً بك في بوت النتائج المباشرة لكرة القدم! أرسل /live لمعرفة النتائج الحالية.")
-
-@bot.message_handler(commands=['live'])
-def send_live_scores(message):
-    bot.reply_to(message, "جاري جلب النتائج المباشرة... يرجى الانتظار.")
-    scores = get_live_scores()
-    if scores:
-        bot.reply_to(message, "تم جلب البيانات بنجاح!")
-    else:
-        bot.reply_to(message, "عذراً، حدث خطأ أثناء جلب النتائج أو لا توجد مباريات الآن.")
-
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def get_message():
     if request.headers.get('content-type') == 'application/json':
@@ -48,9 +21,40 @@ def get_message():
 
 @app.route("/")
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url='https://agabot-live-2026-1.onrender.com' + '/' + BOT_TOKEN)
-    return 'Bot is running!', 200
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url='https://agabot-live-2026-1.onrender.com/' + BOT_TOKEN)
+        return 'Bot is running and webhook set successfully!', 200
+    except Exception as e:
+        return f'Error setting webhook: {e}', 500
+
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "مرحباً بك في بوت النتائج المباشرة لكرة القدم! أرسل /live لمعرفة النتائج الحالية.")
+
+@bot.message_handler(commands=['live', 'matches'])
+def send_live_scores(message):
+    bot.reply_to(message, "جاري جلب النتائج... يرجى الانتظار.")
+    url = "https://api.football-data.org/v4/matches?status=LIVE"
+    headers = {'X-Auth-Token': API_FOOTBALL_KEY}
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            matches = data.get('matches', [])
+            if matches:
+                text = " المباريات الجارية الآن:\n"
+                for match in matches[:5]:
+                    home = match['homeTeam']['name']
+                    away = match['awayTeam']['name']
+                    text += f"- {home} vs {away}\n"
+                bot.reply_to(message, text)
+            else:
+                bot.reply_to(message, "⏳ لا توجد مباريات جارية في هذه اللحظة بالضبط. جرب لاحقاً عندما تبدأ المباريات الحية!")
+        else:
+            bot.reply_to(message, "عذراً، حدث خطأ في الاتصال بمزود البيانات.")
+    except Exception as e:
+        bot.reply_to(message, "عذراً، حدث خطأ أثناء جلب النتائج.")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
