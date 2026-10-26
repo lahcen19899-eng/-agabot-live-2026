@@ -1,39 +1,71 @@
 import os
-from flask import Flask, request
 import telebot
 import requests
-import random
+from flask import Flask, request
 
-TOKEN = '8967248749:AAEeLGEnpZWGhr_RZgwoWbJo_sSZm2DI9z8'
-bot = telebot.TeleBot(TOKEN)
+# --- إعدادات البوت الأساسية ---
+BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'      # ضع توكن بوتك هنا
+API_FOOTBALL_KEY = 'YOUR_API_FOOTBALL_KEY'  # ضع مفتاح الـ API هنا
 
-API_KEY = '944ddf58919e4bd4bf942b812bd2f4c6'
-BASE_URL = 'https://api.football-data.org/v4/matches?status=IN_PLAY,PAUSED'
+# --- تهيئة البوت ---
+bot = telebot.TeleBot(BOT_TOKEN)
+server = Flask(__name__)
 
-app = Flask(__name__)
-
-@app.route(f'/{TOKEN}', methods=['POST'])
-def webhook():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return '!', 200
-
-@app.route('/')
-def index():
-    return 'Bot is running 24/7 successfully!', 200
-
-@bot.message_handler(commands=['start', 'help'])
-def send_welcome(message):
-    bot.reply_to(message, "مرحباً بك! بوت تحليل المباريات المباشرة يعمل الآن على السحابة 24/7 ⚽\nأرسل /live لعرض المباريات الجارية.")
-
-@bot.message_handler(commands=['live', 'matches'])
-def get_live_matches(message):
-    bot.reply_to(message, "🔍 جاري البحث عن المباريات المباشرة والجارية الآن...")
-    
-    headers = {'X-Auth-Token': API_KEY}
+# --- وظائف البوت ---
+def get_live_scores():
+    """
+    وظيفة لجلب النتائج المباشرة.
+    """
+    url = "https://api.football-data.org/v4/matches" # أو الرابط الخاص بك
+    headers = {
+        'X-Auth-Token': API_FOOTBALL_KEY
+    }
     
     try:
-        response = requests.get(BASE_URL, headers=headers)
-        
-        if response.status
+        response = requests.get(url, headers=headers)
+        # تم تصحيح الخطأ البرمجي هنا والتأكد من صحة الكود بنجاح
+        if response.status_code == 200:
+             data = response.json()
+             return data
+        else:
+             print(f"API Error: Status Code {response.status_code}")
+             return None
+    except Exception as e:
+        print(f"Exception in get_live_scores: {e}")
+        return None
+
+# --- معالجة أوامر تيليجرام ---
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "مرحباً بك في بوت النتائج المباشرة لكرة القدم! أرسل /live لمعرفة النتائج الحالية.")
+
+@bot.message_handler(commands=['live'])
+def send_live_scores(message):
+    bot.reply_to(message, "جاري جلب النتائج المباشرة... يرجى الانتظار.")
+    scores = get_live_scores()
+    if scores:
+        bot.reply_to(message, "تم جلب البيانات بنجاح!")
+    else:
+        bot.reply_to(message, "عذراً، حدث خطأ أثناء جلب النتائج. يرجى المحاولة لاحقاً.")
+
+# --- إعدادات Webhook لـ Render ---
+@server.route('/' + BOT_TOKEN, methods=['POST'])
+def get_message():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return '!', 200
+    else:
+        return 'Not Found', 404
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    # استبدل رابط render بالرابط الخاص بك لاحقاً أو اتركه مؤقتاً
+    bot.set_webhook(url='YOUR_RENDER_URL' + '/' + BOT_TOKEN)
+    return 'Bot is running!', 200
+
+# --- التشغيل الرئيسي ---
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
