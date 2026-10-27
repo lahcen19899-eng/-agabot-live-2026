@@ -21,12 +21,9 @@ def get_message():
 
 @app.route("/")
 def webhook():
-    try:
-        bot.remove_webhook()
-        bot.set_webhook(url='https://agabot-live-2026-1.onrender.com/' + BOT_TOKEN)
-        return 'Bot is running and webhook set successfully!', 200
-    except Exception as e:
-        return f'Error setting webhook: {e}', 500
+    bot.remove_webhook()
+    bot.set_webhook(url='https://agabot-live-2026-1.onrender.com/' + BOT_TOKEN)
+    return 'Bot is running successfully!', 200
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
