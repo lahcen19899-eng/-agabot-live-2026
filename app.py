@@ -9,11 +9,6 @@ API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
 
-# --- ضبط الويب هوك تلقائياً عند تشغيل السيرفر ---
-WEBHOOK_URL = 'https://agabot-live-2026-1.onrender.com/' + BOT_TOKEN
-bot.remove_webhook()
-bot.set_webhook(url=WEBHOOK_URL)
-
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def get_message():
     if request.headers.get('content-type') == 'application/json':
@@ -26,7 +21,12 @@ def get_message():
 
 @app.route("/")
 def webhook():
-    return 'Bot is running successfully!', 200
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url='https://agabot-live-2026-1.onrender.com/' + BOT_TOKEN)
+        return 'Bot is running and webhook set successfully!', 200
+    except Exception as e:
+        return f'Bot is running, error setting webhook: {e}', 200
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
