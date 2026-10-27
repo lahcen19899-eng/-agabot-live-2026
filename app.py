@@ -3,7 +3,7 @@ import telebot
 import requests
 from flask import Flask, request
 
-BOT_TOKEN = '8967248749:AAEeLGENpZWGhr_RZgwowbJo_sSZm2DI9z8'
+BOT_TOKEN = '8822777566:AAHuRTTtHUL0239Wcg1A2IuxEPEhnxix1pU'
 API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'
 
 bot = telebot.TeleBot(BOT_TOKEN)
