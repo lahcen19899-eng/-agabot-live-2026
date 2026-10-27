@@ -9,6 +9,13 @@ API_FOOTBALL_KEY = 'f3b98d7a965f4c248b911d8b9a3e6d52'
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
 
+# ربط الويب هوك تلقائياً وسيعمل فوراً دون روابط خارجية
+try:
+    bot.remove_webhook()
+    bot.set_webhook(url=f'https://agabot-live-2026-1.onrender.com/{BOT_TOKEN}')
+except Exception as e:
+    print(f"Webhook error: {e}")
+
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def get_message():
     if request.headers.get('content-type') == 'application/json':
